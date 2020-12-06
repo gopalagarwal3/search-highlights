@@ -1,21 +1,19 @@
-document_text = """The <b>easiest</b> way to learn how to use Streamlit is to try things out yourself"""
+import json
+es_query = """{
+              "query": {
+                "query_string": {
+                    "query": "%s"
+                }
+              },
+              "highlight": {
+                "fields": {
+                  "content": {
+                    "type": "offset"
+                  }
+                },
+                "fragment_size": 50
+              }
+            }"""%('dasdass')
 
-# display_text = search_text.replace(query, """<span style="background-color: #FFFF00">""" + query + "</span>")
-# st.markdown(search_text) # not highlighting well :|
-
-snippet_offsets = [{'start': 0, 'end': 20}, {'start': 30, 'end': 32}]
-
-hl_text_snippets = []
-
-pos = 0
-for snippet in snippet_offsets:
-    hl_text_snippets.append(document_text[pos:snippet['start']])
-    hl_text_snippets.append("""<span style="background-color: #FFFF00">""")
-    hl_text_snippets.append(document_text[snippet['start']:snippet['end']])
-    hl_text_snippets.append("</span>")
-    pos = snippet['end']
-hl_text_snippets.append(document_text[pos:])
-
-hl_text = ''.join(hl_text_snippets)
-
-print(hl_text)
+print(es_query)
+print(json.loads(es_query))

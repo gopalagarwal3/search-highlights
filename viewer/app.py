@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import streamlit.components.v1 as st_html
 import time
-import pysolr
+import solr_search
+import es_search
 from typing import List
 import xml.etree.ElementTree as ET
 
@@ -12,44 +13,6 @@ document_text = """The easiest way to learn how to use Streamlit is to try thing
 st.write("Search Text:", document_text)
 
 query = st.text_input("Search Query", "app")
-
-def search_solr(search_query, search_text) -> List[str]:
-    """search solr"""
-    solr_con = pysolr.Solr("http://localhost:8983/solr/techproducts/", timeout=10, always_commit=True)
-
-    # Do a health check.
-    solr_con.ping()
-
-    solr_con.add([
-        {
-            "id": "doc_1",
-            "content_light_tv": search_text
-        }
-        # ,{
-        #     "id": "doc_2",
-        #     "content": "The Banana: Tasty or Dangerous?"
-        # },
-    ])
-    # solr_query = "content_light_tv:" + search_query
-    results = solr_con.search(search_query, **{
-        'hl': 'on',
-        # 'hl.fragsize': 10,
-        'hl.snippets': 1000,
-        'fq': 'id:doc_1',
-        'qf': 'content_light_tv',
-        'defType': 'edismax',
-        'hl.tag.pre': '<b>',
-        'hl.tag.post': '</b>'
-    })
-
-    snippets = []
-    for result in results:
-        snippets.extend(results.highlighting[result['id']]['content_light_tv'])
-    # for field_snippet in results.highlighting[result['id']]['content_light_tv']:
-
-    solr_snippet_offsets = get_snippet_offsets(snippets)
-
-    return solr_snippet_offsets
 
 
 def get_snippet_offsets(search_snippets):
@@ -72,15 +35,6 @@ def get_snippet_offsets(search_snippets):
 
     return snippet_offset_list
 
-
-snippet_offsets = []
-search_engine = st.radio("Which search engine?", ('SOLR', 'ES'))
-if search_engine == "SOLR":
-    snippet_offsets = search_solr(query, document_text)
-
-
-# elif search_engine == "ES"
-#     snippet_offsets = search_es(query, search_text)
 
 def get_highlighted_text(_snippet_offset_list):
     hl_text_snippets = []
@@ -110,4 +64,16 @@ def get_highlighted_text(_snippet_offset_list):
     return hl_text
 
 
-st_html.html(get_highlighted_text(snippet_offsets))
+result_snippets = []
+search_engine = st.radio("Which search engine?", ('SOLR', 'ES'))
+if search_engine == "SOLR":
+    result_snippets = solr_search.search_solr(query, document_text)
+elif search_engine == "ES":
+    result_snippets = es_search.search_es(query, document_text)
+else:
+    print("Not cool!")
+
+snippet_offsets = get_snippet_offsets(result_snippets)
+highlighted_text = get_highlighted_text(snippet_offsets)
+
+st_html.html(highlighted_text)

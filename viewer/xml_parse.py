@@ -1,4 +1,4 @@
-snippet_xml = """<offset start="127" end="294">As long as your <keyword start="143" end="146"/><em>app</em> is running, every time you add a new element to your script and save, Streamlit’s UI will ask if you’d like to rerun the <keyword start="268" end="271"/><em>app</em> and view the changes. </offset>"""
+snippet_xml = """<offset start="0" end="58">Fundamental to <keyword start="15" end="18"/><b>the</b> internals of highlighting are detecting</offset>"""
 
 import xml.etree.ElementTree as ET
 root = ET.fromstring(snippet_xml)
